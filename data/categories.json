@@ -1,1 +1,13 @@
+[
+{
+"id":"central",
+"name":"🇮🇳 Central Government Exams",
+"page":"category.html?type=central"
+},
 
+{
+"id":"rajasthan",
+"name":"🏜 Rajasthan Government Exams",
+"page":"category.html?type=rajasthan"
+}
+]
