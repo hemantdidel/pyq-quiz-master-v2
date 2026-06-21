@@ -1,0 +1,31 @@
+[
+  {
+    "name": "🚂 Group D",
+    "description": "Railway Group D Practice Tests",
+    "folder": "groupd"
+  },
+
+  {
+    "name": "🚆 ALP",
+    "description": "Assistant Loco Pilot Tests",
+    "folder": "alp"
+  },
+
+  {
+    "name": "🚄 NTPC",
+    "description": "NTPC Practice Tests",
+    "folder": "ntpc"
+  },
+
+  {
+    "name": "🛠 Technician",
+    "description": "Railway Technician Tests",
+    "folder": "technician"
+  },
+
+  {
+    "name": "👨‍🔧 JE",
+    "description": "Junior Engineer Tests",
+    "folder": "je"
+  }
+]
