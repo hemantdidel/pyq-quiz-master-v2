@@ -1,0 +1,25 @@
+[
+  {
+    "name": "📋 GD",
+    "description": "SSC GD Practice Tests",
+    "folder": "gd"
+  },
+
+  {
+    "name": "📄 CGL",
+    "description": "SSC CGL Practice Tests",
+    "folder": "cgl"
+  },
+
+  {
+    "name": "📝 CHSL",
+    "description": "SSC CHSL Practice Tests",
+    "folder": "chsl"
+  },
+
+  {
+    "name": "📚 MTS",
+    "description": "SSC MTS Practice Tests",
+    "folder": "mts"
+  }
+]
