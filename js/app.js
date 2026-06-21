@@ -1,57 +1,39 @@
 // Load Categories
 
 fetch("data/categories.json")
+.then(response => response.json())
+.then(data => {
 
-.then(response=>response.json())
+    const container = document.getElementById("categoryContainer");
 
-.then(data=>{
+    let html = "";
 
-let container=document.getElementById("categoryContainer");
+    data.forEach(category => {
 
-let html="";
+        html += `
+        <div class="card">
 
-data.forEach(category=>{
+            <h2>${category.title}</h2>
 
-html+=`
+            <p>${category.description}</p>
 
-<div class="card">
+            <a
+                class="btn"
+                href="category.html?category=${category.folder}">
+                Explore
+            </a>
 
-<h2>
+        </div>
+        `;
 
-${category.name}
+    });
 
-</h2>
-
-<p>
-
-Click to explore practice tests
-
-</p>
-
-<a
-
-class="btn"
-
-href="category.html?category=${category.folder}"
-
-Open
-
-</a>
-
-</div>
-
-`;
-
-});
-
-container.innerHTML=html;
+    container.innerHTML = html;
 
 })
+.catch(() => {
 
-.catch(()=>{
-
-document.getElementById("categoryContainer").innerHTML=
-
-"<h2>Unable to load categories.</h2>";
+    document.getElementById("categoryContainer").innerHTML =
+    "<h2>Unable to load categories.</h2>";
 
 });
