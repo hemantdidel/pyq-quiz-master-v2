@@ -139,3 +139,56 @@ color:white;
 text-align:center;
 font-size:14px;
 }
+
+/* ===================== */
+/* MOBILE RESPONSIVE FIX */
+/* ===================== */
+
+@media (max-width: 768px){
+
+header h1{
+font-size:22px;
+}
+
+header p{
+font-size:12px;
+}
+
+.hero{
+padding:20px 10px;
+}
+
+.hero h2{
+font-size:18px;
+}
+
+.container{
+padding:10px;
+}
+
+.grid{
+grid-template-columns:1fr;
+gap:15px;
+}
+
+.card{
+padding:15px;
+border-radius:12px;
+}
+
+.btn{
+width:100%;
+text-align:center;
+padding:12px;
+}
+
+.search input{
+font-size:14px;
+padding:12px;
+}
+
+.section-title{
+font-size:18px;
+text-align:center;
+}
+}
