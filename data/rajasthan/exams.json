@@ -1,1 +1,49 @@
+[
+  {
+    "name": "🎯 CET",
+    "description": "Common Eligibility Test",
+    "folder": "cet"
+  },
 
+  {
+    "name": "🍎 REET",
+    "description": "Teacher Eligibility Test",
+    "folder": "reet"
+  },
+
+  {
+    "name": "👮 RAS",
+    "description": "Rajasthan Administrative Service",
+    "folder": "ras"
+  },
+
+  {
+    "name": "🚔 SI",
+    "description": "Sub Inspector",
+    "folder": "si"
+  },
+
+  {
+    "name": "🛡 Constable",
+    "description": "Police Constable",
+    "folder": "constable"
+  },
+
+  {
+    "name": "🏡 VDO",
+    "description": "Village Development Officer",
+    "folder": "vdo"
+  },
+
+  {
+    "name": "📄 LDC",
+    "description": "Lower Division Clerk",
+    "folder": "ldc"
+  },
+
+  {
+    "name": "🌾 Patwari",
+    "description": "Patwari Recruitment",
+    "folder": "patwari"
+  }
+]
