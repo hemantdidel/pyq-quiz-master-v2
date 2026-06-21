@@ -32,7 +32,7 @@ Click to explore practice tests
 
 class="btn"
 
-href="${category.page}">
+href="category.html?category=${category.folder}"
 
 Open
 
