@@ -1,12 +1,12 @@
 [
   {
-    "title":"🇮🇳 Central Government Exams",
-    "description":"Click to explore practice tests",
-    "folder":"central"
+    "title": "🇮🇳 Central Government Exams",
+    "description": "Railway, SSC, Banking & Defence Practice Tests",
+    "folder": "central"
   },
   {
-    "title":"🏜 Rajasthan Government Exams",
-    "description":"Click to explore practice tests",
-    "folder":"rajasthan"
+    "title": "🏜 Rajasthan Government Exams",
+    "description": "CET, REET, RAS, SI, VDO & More",
+    "folder": "rajasthan"
   }
 ]
