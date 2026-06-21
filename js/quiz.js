@@ -66,6 +66,8 @@ window.addEventListener("load", () => {
 
 async function loadQuiz(){
 
+    console.log("DATA_PATH =", DATA_PATH);
+
     try{
 
         const response = await fetch(DATA_PATH);
@@ -99,7 +101,6 @@ async function loadQuiz(){
     }
 
 }
-
 
 /* ==========================
    Load Saved State
