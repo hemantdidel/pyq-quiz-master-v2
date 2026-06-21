@@ -1,13 +1,12 @@
 [
-{
-"id":"central",
-"name":"🇮🇳 Central Government Exams",
-"page":"category.html?type=central"
-},
-
-{
-"id":"rajasthan",
-"name":"🏜 Rajasthan Government Exams",
-"page":"category.html?type=rajasthan"
-}
+  {
+    "title":"🇮🇳 Central Government Exams",
+    "description":"Click to explore practice tests",
+    "folder":"central"
+  },
+  {
+    "title":"🏜 Rajasthan Government Exams",
+    "description":"Click to explore practice tests",
+    "folder":"rajasthan"
+  }
 ]
