@@ -433,39 +433,43 @@ function submitQuiz(){
 
     clearInterval(timerInterval);
 
-    let score=0;
+    let score = 0;
+
+    console.log("quizData:", quizData);
+    console.log("userAnswers:", userAnswers);
 
     quizData.forEach((q,index)=>{
 
-        if(userAnswers[index]==q.answer){
+        console.log(
+            "Q",index+1,
+            "User:",userAnswers[index],
+            "Correct:",q.answer,
+            "Match:",userAnswers[index]===q.answer
+        );
 
+        if(userAnswers[index]===q.answer){
             score++;
-
         }
 
     });
 
+    console.log("Final Score:",score);
+
     const result={
 
         total:quizData.length,
-
         score:score,
-
         answers:userAnswers,
-
         questions:quizData
 
     };
 
+    console.log("Result Object:",result);
+
     localStorage.setItem(
-
         "quiz_result",
-
         JSON.stringify(result)
-
     );
-
-    localStorage.removeItem(STORAGE_KEY);
 
     window.location.href="result.html";
 
