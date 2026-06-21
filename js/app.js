@@ -1,39 +1,98 @@
+// ==========================
+// Category Container
+// ==========================
+
+const categoryContainer =
+document.getElementById("categoryContainer");
+
+const searchInput =
+document.getElementById("searchInput");
+
+let categories = [];
+
+// ==========================
 // Load Categories
+// ==========================
 
 fetch("data/categories.json")
+
 .then(response => response.json())
+
 .then(data => {
 
-    const container = document.getElementById("categoryContainer");
+    categories = data;
+
+    displayCategories(categories);
+
+})
+
+.catch(() => {
+
+    categoryContainer.innerHTML = `
+
+    <div class="card">
+
+        <h2>⚠ Unable to Load</h2>
+
+        <p>Please refresh the page.</p>
+
+    </div>
+
+    `;
+
+});
+
+// ==========================
+// Display Categories
+// ==========================
+
+function displayCategories(list){
 
     let html = "";
 
-    data.forEach(category => {
+    list.forEach(item => {
 
         html += `
+
         <div class="card">
 
-            <h2>${category.title}</h2>
+            <h2>${item.title}</h2>
 
-            <p>${category.description}</p>
+            <p>${item.description}</p>
 
             <a
-                class="btn"
-                href="category.html?category=${category.folder}">
-                Explore
+            class="btn"
+            href="category.html?category=${item.folder}">
+
+            Explore
+
             </a>
 
         </div>
+
         `;
 
     });
 
-    container.innerHTML = html;
+    categoryContainer.innerHTML = html;
 
-})
-.catch(() => {
+}
 
-    document.getElementById("categoryContainer").innerHTML =
-    "<h2>Unable to load categories.</h2>";
+// ==========================
+// Search
+// ==========================
+
+searchInput.addEventListener("input", () => {
+
+    const keyword =
+    searchInput.value.toLowerCase();
+
+    const filtered = categories.filter(item =>
+
+        item.title.toLowerCase().includes(keyword)
+
+    );
+
+    displayCategories(filtered);
 
 });
