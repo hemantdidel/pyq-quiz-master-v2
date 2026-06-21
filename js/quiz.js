@@ -233,9 +233,13 @@ function loadQuestion(index){
 
 function selectAnswer(option){
 
-    userAnswers[currentQuestion]=option;
+    userAnswers[currentQuestion] = option;
 
     saveState();
+
+    updatePalette();
+
+    updateProgress();
 
     loadQuestion(currentQuestion);
 
@@ -305,25 +309,20 @@ function createPalette(){
 
 function updatePalette(){
 
-    const buttons=document.querySelectorAll(".palette-btn");
+    const buttons = document.querySelectorAll(".palette-btn");
 
     buttons.forEach((btn,index)=>{
 
-        btn.classList.remove(
+        btn.classList.remove("current");
+        btn.classList.remove("answered");
 
-            "current",
-
-            "answered"
-
-        );
-
-        if(index==currentQuestion){
+        if(index===currentQuestion){
 
             btn.classList.add("current");
 
         }
 
-        if(userAnswers[index]!=null){
+        if(userAnswers[index]!==null){
 
             btn.classList.add("answered");
 
