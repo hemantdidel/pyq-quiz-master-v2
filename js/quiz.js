@@ -1,159 +1,109 @@
-/* ===========================================
-   PYQ Quiz Master v2
+/* ==========================================
+   PYQ Quiz Master v3
    Production Quiz Engine
-=========================================== */
+   Part 1.1
+========================================== */
 
 "use strict";
 
-/* ==========================
-   Global Variables
-========================== */
+/* ==========================================
+   CONFIG
+========================================== */
 
-let quizData = [];
-let currentQuestion = 0;
-let userAnswers = [];
+const QuizApp = {
 
-let timerInterval = null;
-let totalTime = 0;
-let remainingTime = 0;
+    data: [],
+    current: 0,
+    answers: [],
 
-/* ==========================
+    totalTime: 0,
+    remainingTime: 0,
+
+    timer: null,
+
+    dataPath: "",
+    storageKey: ""
+
+};
+
+/* ==========================================
    DOM
-========================== */
+========================================== */
 
-const questionBox =
-document.getElementById("questionBox");
+const $ = (id) => document.getElementById(id);
 
-const optionsBox =
-document.getElementById("optionsBox");
+const DOM = {
 
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const submitBtn = document.getElementById("submitBtn");
+    title: $("quizTitle"),
 
-const palette = document.getElementById("palette");
+    timer: $("timer"),
 
-const timerText = document.getElementById("timer");
+    progress: $("progressBar"),
 
-const progressBar = document.getElementById("progressBar");
+    questionNumber: $("questionNumber"),
 
-/* ==========================
-   URL Params
-========================== */
+    questionBox: $("questionBox"),
 
-const params = new URLSearchParams(window.location.search);
+    optionsBox: $("optionsBox"),
 
-const DATA_PATH = params.get("file");
+    palette: $("palette"),
 
-const STORAGE_KEY =
-"quiz_" + btoa(DATA_PATH);
+    prevBtn: $("prevBtn"),
 
+    nextBtn: $("nextBtn"),
 
-/* ==========================
-   Start
-========================== */
+    submitBtn: $("submitBtn")
 
-window.addEventListener("load", () => {
+};
 
-    loadQuiz();
+/* ==========================================
+   URL
+========================================== */
 
-});
+function loadURL() {
 
+    const params = new URLSearchParams(window.location.search);
 
-/* ==========================
-   Load Quiz
-========================== */
+    const file = params.get("file");
 
-async function loadQuiz(){
+    if (!file) {
 
-    console.log("DATA_PATH =", DATA_PATH);
+        alert("Quiz file missing.");
 
-    try{
+        window.location.href = "tests.html";
 
-        const response = await fetch(DATA_PATH);
-
-        if(!response.ok){
-
-            throw new Error("Quiz not found");
-
-        }
-
-        quizData = await response.json();
-
-        loadSavedState();
-
-        createPalette();
-
-        loadQuestion(currentQuestion);
-
-        updateProgress();
-
-        startTimer();
+        return false;
 
     }
 
-    catch(error){
+    QuizApp.dataPath = file;
 
-        console.log(error);
+    QuizApp.storageKey =
+        "quiz_" + btoa(file);
 
-        alert("Unable to load quiz.");
-
-    }
+    return true;
 
 }
 
-/* ==========================
-   Load Saved State
-========================== */
+/* ==========================================
+   STORAGE
+========================================== */
 
-function loadSavedState(){
+function saveState() {
 
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const state = {
 
-    if(saved){
+        current: QuizApp.current,
 
-        const state = JSON.parse(saved);
+        answers: QuizApp.answers,
 
-        userAnswers = state.answers;
-
-        currentQuestion = state.current;
-
-        remainingTime = state.remaining;
-
-    }
-
-    else{
-
-        userAnswers = new Array(quizData.length).fill(null);
-
-        totalTime = quizData.length * 60;
-
-        remainingTime = totalTime;
-
-    }
-
-}
-
-
-/* ==========================
-   Save State
-========================== */
-
-function saveState(){
-
-    const state={
-
-        answers:userAnswers,
-
-        current:currentQuestion,
-
-        remaining:remainingTime
+        remainingTime: QuizApp.remainingTime
 
     };
 
     localStorage.setItem(
 
-        STORAGE_KEY,
+        QuizApp.storageKey,
 
         JSON.stringify(state)
 
@@ -161,62 +111,249 @@ function saveState(){
 
 }
 
+function loadState() {
 
-/* ==========================
-   Load Question
-========================== */
+    const saved = localStorage.getItem(
 
-function loadQuestion(index){
+        QuizApp.storageKey
 
-    currentQuestion=index;
+    );
 
-    const q=quizData[index];
+    if (!saved) return;
 
-    questionBox.innerHTML=
+    try {
 
-    `
-    <h2>Q${index+1}. ${q.question}</h2>
-    `;
+        const state = JSON.parse(saved);
 
-    optionsBox.innerHTML="";
+        QuizApp.current =
+            state.current ?? 0;
 
-    q.options.forEach((option,i)=>{
+        QuizApp.answers =
+            state.answers ?? [];
 
-        const div=document.createElement("div");
+        QuizApp.remainingTime =
+            state.remainingTime ?? 0;
 
-        div.className="option";
+    }
 
-        if(userAnswers[index]==i){
+    catch (e) {
 
-            div.classList.add("selected");
+        console.log(e);
+
+    }
+
+}
+
+/* ==========================================
+   LOAD QUIZ
+========================================== */
+
+async function loadQuiz() {
+
+    try {
+
+        console.log(
+
+            "Loading:",
+
+            QuizApp.dataPath
+
+        );
+
+        const response =
+            await fetch(QuizApp.dataPath);
+
+        if (!response.ok) {
+
+            throw new Error(
+
+                "Unable to load JSON"
+
+            );
 
         }
 
-        div.innerHTML=
+        QuizApp.data =
+            await response.json();
 
-        `
-        <label>
+        if (!Array.isArray(QuizApp.data)) {
 
-        <input
-        type="radio"
-        name="option"
-        value="${i}"
-        ${userAnswers[index]==i?"checked":""}
-        >
+            throw new Error(
 
-        ${option}
+                "Invalid Quiz Data"
 
-        </label>
+            );
 
+        }
+
+        if (QuizApp.answers.length === 0) {
+
+            QuizApp.answers =
+                new Array(
+
+                    QuizApp.data.length
+
+                ).fill(null);
+
+        }
+
+        if (QuizApp.remainingTime <= 0) {
+
+            QuizApp.totalTime =
+                QuizApp.data.length * 60;
+
+            QuizApp.remainingTime =
+                QuizApp.totalTime;
+
+        }
+
+        DOM.title.textContent =
+
+            QuizApp.dataPath
+
+            .split("/")
+
+            .pop()
+
+            .replace(".json", "")
+
+            .replaceAll("-", " ")
+
+            .toUpperCase();
+
+        initQuiz();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        DOM.questionBox.innerHTML =
+
+            `
+            <h2>Unable to load quiz.</h2>
+            <p>${error.message}</p>
+            `;
+
+    }
+
+}
+
+/* ==========================================
+   INIT
+========================================== */
+
+function initQuiz(){
+
+    console.log("Questions:", QuizApp.data.length);
+
+    createPalette();
+
+    bindEvents();
+
+    renderQuestion();
+
+}
+
+*/
+      Part 1.2
+
+      renderQuestion();
+      createPalette();
+      bindEvents();
+
+    */
+
+}
+
+/* ==========================================
+   START
+========================================== */
+
+window.addEventListener(
+
+    "load",
+
+    () => {
+
+        if (!loadURL()) return;
+
+        loadState();
+
+        loadQuiz();
+
+    }
+
+);
+
+window.addEventListener(
+
+    "beforeunload",
+
+    () => {
+
+        saveState();
+
+    }
+
+);
+/* ==========================================
+   PART 1.2
+   Render + Navigation + Palette
+========================================== */
+
+function renderQuestion() {
+
+    const q = QuizApp.data[QuizApp.current];
+
+    if (!q) return;
+
+    DOM.questionNumber.textContent =
+        `Question ${QuizApp.current + 1} / ${QuizApp.data.length}`;
+
+    DOM.questionBox.innerHTML =
+        `<h2>Q${QuizApp.current + 1}. ${q.question}</h2>`;
+
+    DOM.optionsBox.innerHTML = "";
+
+    q.options.forEach((option, index) => {
+
+        const item = document.createElement("div");
+
+        item.className = "option";
+
+        if (QuizApp.answers[QuizApp.current] === index) {
+            item.classList.add("selected");
+        }
+
+        item.innerHTML = `
+            <label>
+                <input
+                    type="radio"
+                    name="quizOption"
+                    value="${index}"
+                    ${QuizApp.answers[QuizApp.current] === index ? "checked" : ""}
+                >
+                ${option}
+            </label>
         `;
 
-        div.addEventListener("click",()=>{
+        item.addEventListener("click", () => {
 
-            selectAnswer(i);
+            QuizApp.answers[QuizApp.current] = index;
+
+            saveState();
+
+            updatePalette();
+
+            updateProgress();
+
+            renderQuestion();
 
         });
 
-        optionsBox.appendChild(div);
+        DOM.optionsBox.appendChild(item);
 
     });
 
@@ -224,81 +361,39 @@ function loadQuestion(index){
 
     updateProgress();
 
-}
+    DOM.prevBtn.disabled =
+        QuizApp.current === 0;
 
-
-/* ==========================
-   Select Answer
-========================== */
-
-function selectAnswer(option){
-
-    userAnswers[currentQuestion] = option;
-
-    saveState();
-
-    updatePalette();
-
-    updateProgress();
-
-    loadQuestion(currentQuestion);
+    DOM.nextBtn.disabled =
+        QuizApp.current === QuizApp.data.length - 1;
 
 }
 
-
-/* ==========================
-   Previous
-========================== */
-
-prevBtn.addEventListener("click",()=>{
-
-    if(currentQuestion>0){
-
-        loadQuestion(currentQuestion-1);
-
-    }
-
-});
-
-
-/* ==========================
-   Next
-========================== */
-
-nextBtn.addEventListener("click",()=>{
-
-    if(currentQuestion<quizData.length-1){
-
-        loadQuestion(currentQuestion+1);
-
-    }
-
-});
-
-
-/* ==========================
+/* ==========================================
    Palette
-========================== */
+========================================== */
 
-function createPalette(){
+function createPalette() {
 
-    palette.innerHTML="";
+    DOM.palette.innerHTML = "";
 
-    quizData.forEach((q,index)=>{
+    QuizApp.data.forEach((item, index) => {
 
-        const btn=document.createElement("button");
+        const btn = document.createElement("button");
 
-        btn.innerText=index+1;
+        btn.className = "palette-btn";
 
-        btn.className="palette-btn";
+        btn.textContent = index + 1;
 
-        btn.onclick=()=>{
+        btn.addEventListener("click", () => {
 
-            loadQuestion(index);
+            QuizApp.current = index;
 
-        };
+            renderQuestion();
 
-        palette.appendChild(btn);
+        });
+
+        DOM.palette.appendChild(btn);
 
     });
 
@@ -306,186 +401,503 @@ function createPalette(){
 
 }
 
+function updatePalette() {
 
-function updatePalette(){
+    const buttons =
+        DOM.palette.querySelectorAll(".palette-btn");
 
-    const buttons = document.querySelectorAll(".palette-btn");
-
-    buttons.forEach((btn,index)=>{
+    buttons.forEach((btn, index) => {
 
         btn.classList.remove("current");
         btn.classList.remove("answered");
 
-        if(index===currentQuestion){
-
+        if (index === QuizApp.current) {
             btn.classList.add("current");
-
         }
 
-        if(userAnswers[index]!==null){
-
+        if (QuizApp.answers[index] !== null) {
             btn.classList.add("answered");
-
         }
 
     });
 
 }
 
-
-/* ==========================
+/* ==========================================
    Progress
-========================== */
+========================================== */
 
-function updateProgress(){
+function updateProgress() {
 
-    let answered=0;
+    const answered =
+        QuizApp.answers.filter(x => x !== null).length;
 
-    userAnswers.forEach(a=>{
+    const percent =
+        (answered / QuizApp.data.length) * 100;
 
-        if(a!=null){
+    DOM.progress.style.width =
+        percent + "%";
 
-            answered++;
+}
+
+/* ==========================================
+   Navigation
+========================================== */
+
+function bindEvents() {
+
+    DOM.prevBtn.addEventListener("click", () => {
+
+        if (QuizApp.current > 0) {
+
+            QuizApp.current--;
+
+            renderQuestion();
 
         }
 
     });
 
-    let percent=
+    DOM.nextBtn.addEventListener("click", () => {
 
-    (answered/quizData.length)*100;
+        if (QuizApp.current < QuizApp.data.length - 1) {
 
-    progressBar.style.width=
+            QuizApp.current++;
 
-    percent+"%";
+            renderQuestion();
+
+        }
+
+    });
 
 }
 
+/* ==========================================
+   Update initQuiz()
+========================================== */
 
-/* ==========================
+/*
+
+Part 1.1 में initQuiz() को बदलकर यह कर देना:
+
+function initQuiz(){
+
+    console.log("Questions:", QuizApp.data.length);
+
+    createPalette();
+
+    bindEvents();
+
+    renderQuestion();
+
+}
+
+*/
+/* ==========================================
+   PART 1.3
+   Timer + Autosave + Keyboard + Submit
+========================================== */
+
+function formatTime(seconds) {
+
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+
+    return (
+        String(min).padStart(2, "0") +
+        ":" +
+        String(sec).padStart(2, "0")
+    );
+
+}
+
+/* ==========================================
    Timer
-========================== */
+========================================== */
 
-function startTimer(){
+function updateTimer() {
 
-    timerInterval=setInterval(()=>{
+    DOM.timer.textContent =
+        "⏱ " + formatTime(QuizApp.remainingTime);
 
-        remainingTime--;
+}
+
+function startTimer() {
+
+    updateTimer();
+
+    if (QuizApp.timer) {
+
+        clearInterval(QuizApp.timer);
+
+    }
+
+    QuizApp.timer = setInterval(() => {
+
+        QuizApp.remainingTime--;
 
         saveState();
 
         updateTimer();
 
-        if(remainingTime<=0){
+        if (QuizApp.remainingTime <= 0) {
 
-            clearInterval(timerInterval);
+            clearInterval(QuizApp.timer);
 
             submitQuiz();
 
         }
 
-    },1000);
+    }, 1000);
 
 }
 
+/* ==========================================
+   Autosave
+========================================== */
 
-function updateTimer(){
+function autoSave() {
 
-    const min=
-
-    Math.floor(remainingTime/60);
-
-    const sec=
-
-    remainingTime%60;
-
-    timerText.innerHTML=
-
-    `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+    saveState();
 
 }
 
+setInterval(() => {
 
-/* ==========================
-   Submit
-========================== */
+    autoSave();
 
-submitBtn.addEventListener("click",()=>{
+}, 5000);
 
-    let confirmSubmit=
+/* ==========================================
+   Keyboard Navigation
+========================================== */
 
-    confirm("Submit Quiz?");
+document.addEventListener("keydown", (e) => {
 
-    if(confirmSubmit){
+    if (e.key === "ArrowLeft") {
 
-        submitQuiz();
+        if (QuizApp.current > 0) {
+
+            QuizApp.current--;
+
+            renderQuestion();
+
+        }
+
+    }
+
+    if (e.key === "ArrowRight") {
+
+        if (
+            QuizApp.current <
+            QuizApp.data.length - 1
+        ) {
+
+            QuizApp.current++;
+
+            renderQuestion();
+
+        }
+
+    }
+
+    if (
+        e.key === "1" ||
+        e.key === "2" ||
+        e.key === "3" ||
+        e.key === "4"
+    ) {
+
+        const option =
+            Number(e.key) - 1;
+
+        const q =
+            QuizApp.data[QuizApp.current];
+
+        if (q.options[option] !== undefined) {
+
+            QuizApp.answers[
+                QuizApp.current
+            ] = option;
+
+            saveState();
+
+            updatePalette();
+
+            updateProgress();
+
+            renderQuestion();
+
+        }
 
     }
 
 });
 
+/* ==========================================
+   Submit
+========================================== */
 
-/* ==========================
-   Submit Function
-========================== */
+function submitQuiz() {
 
-function submitQuiz(){
-
-    clearInterval(timerInterval);
+    clearInterval(QuizApp.timer);
 
     let score = 0;
 
-    console.log("quizData:", quizData);
-    console.log("userAnswers:", userAnswers);
+    QuizApp.data.forEach((q, index) => {
 
-    quizData.forEach((q,index)=>{
+        if (
+            Number(QuizApp.answers[index]) ===
+            Number(q.answer)
+        ) {
 
-        console.log(
-            "Q",index+1,
-            "User:",userAnswers[index],
-            "Correct:",q.answer,
-            "Match:",userAnswers[index]===q.answer
-        );
-
-        if(userAnswers[index]===q.answer){
             score++;
+
         }
 
     });
 
-    console.log("Final Score:",score);
+    const attempted =
+        QuizApp.answers.filter(
+            x => x !== null
+        ).length;
 
-    const result={
+    const result = {
 
-        total:quizData.length,
-        score:score,
-        answers:userAnswers,
-        questions:quizData
+        total: QuizApp.data.length,
+
+        score: score,
+
+        attempted: attempted,
+
+        answers: QuizApp.answers,
+
+        questions: QuizApp.data,
+
+        timeLeft: QuizApp.remainingTime,
+
+        submittedAt: Date.now()
 
     };
-
-    console.log("Result Object:",result);
 
     localStorage.setItem(
         "quiz_result",
         JSON.stringify(result)
     );
 
-    window.location.href="result.html";
+    localStorage.removeItem(
+        QuizApp.storageKey
+    );
+
+    window.location.href =
+        "result.html";
 
 }
 
+/* ==========================================
+   Submit Button
+========================================== */
 
-/* ==========================
-   Prevent Refresh Loss
-========================== */
+DOM.submitBtn.addEventListener(
+    "click",
+    () => {
+
+        const ok = confirm(
+            "क्या आप टेस्ट सबमिट करना चाहते हैं?"
+        );
+
+        if (ok) {
+
+            submitQuiz();
+
+        }
+
+    }
+);
+
+/* ==========================================
+   Update initQuiz()
+========================================== */
+
+/*
+
+function initQuiz(){
+
+    createPalette();
+
+    bindEvents();
+
+    renderQuestion();
+
+    startTimer();
+
+    updateProgress();
+
+}
+
+*/
+/* ==========================================
+   PART 1.4
+   Final Init + Resume + Recovery
+========================================== */
+
+function showResumeDialog() {
+
+    const saved = localStorage.getItem(
+        QuizApp.storageKey
+    );
+
+    if (!saved) return;
+
+    try {
+
+        const state = JSON.parse(saved);
+
+        if (
+            Array.isArray(state.answers) &&
+            state.answers.some(a => a !== null)
+        ) {
+
+            const resume = confirm(
+                "Previous quiz found.\nResume from last position?"
+            );
+
+            if (!resume) {
+
+                localStorage.removeItem(
+                    QuizApp.storageKey
+                );
+
+                QuizApp.current = 0;
+
+                QuizApp.answers =
+                    new Array(
+                        QuizApp.data.length
+                    ).fill(null);
+
+                QuizApp.remainingTime =
+                    QuizApp.totalTime;
+
+            }
+
+        }
+
+    } catch (e) {
+
+        console.log(e);
+
+    }
+
+}
+
+/* ==========================================
+   Visibility Auto Save
+========================================== */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (document.hidden) {
+
+            saveState();
+
+        }
+
+    }
+);
+
+/* ==========================================
+   Online / Offline
+========================================== */
 
 window.addEventListener(
+    "offline",
+    () => {
 
-"beforeunload",
+        console.log("Offline");
 
-()=>{
+    }
+);
 
-    saveState();
+window.addEventListener(
+    "online",
+    () => {
 
-});
+        console.log("Online");
+
+    }
+);
+
+/* ==========================================
+   Error Handler
+========================================== */
+
+window.addEventListener(
+    "error",
+    (event) => {
+
+        console.error(event.error);
+
+    }
+);
+
+/* ==========================================
+   Final Init
+========================================== */
+
+function initQuiz() {
+
+    QuizApp.totalTime =
+        QuizApp.data.length * 60;
+
+    showResumeDialog();
+
+    createPalette();
+
+    bindEvents();
+
+    renderQuestion();
+
+    updateProgress();
+
+    updateTimer();
+
+    startTimer();
+
+}
+
+/* ==========================================
+   Helper
+========================================== */
+
+function resetQuizState() {
+
+    localStorage.removeItem(
+        QuizApp.storageKey
+    );
+
+    QuizApp.current = 0;
+
+    QuizApp.answers =
+        new Array(
+            QuizApp.data.length
+        ).fill(null);
+
+    QuizApp.remainingTime =
+        QuizApp.totalTime;
+
+}
+
+/* ==========================================
+   Safe Submit
+========================================== */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        saveState();
+
+    }
+);
