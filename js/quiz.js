@@ -21,8 +21,11 @@ let remainingTime = 0;
    DOM
 ========================== */
 
-const questionBox = document.getElementById("question");
-const optionsBox = document.getElementById("options");
+const questionBox =
+document.getElementById("questionBox");
+
+const optionsBox =
+document.getElementById("optionsBox");
 
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
@@ -40,15 +43,10 @@ const progressBar = document.getElementById("progressBar");
 
 const params = new URLSearchParams(window.location.search);
 
-const category = params.get("category");
-const exam = params.get("exam");
-const test = params.get("test");
-
-const DATA_PATH =
-`data/${category}/${exam}/${test}.json`;
+const DATA_PATH = params.get("file");
 
 const STORAGE_KEY =
-`quiz_${category}_${exam}_${test}`;
+"quiz_" + btoa(DATA_PATH);
 
 
 /* ==========================
